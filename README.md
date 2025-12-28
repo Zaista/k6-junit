@@ -20,7 +20,7 @@ export function handleSummary(data) {
 }
 ```
 
-### Typescript integration
+### TypeScript integration
 Based on [k6-template-typescript](https://github.com/grafana/k6-template-typescript).
 
 Add dev-dependency to `package.json`:
@@ -33,7 +33,7 @@ Add dev-dependency to `package.json`:
 
 ```
 
-Resolve `k6-junit` package as internal dependecy in `webpack.config.js`:
+Resolve `k6-junit` package as internal dependency in `webpack.config.js`:
 ```javascript
 // ...
 module.exports = {
@@ -51,10 +51,13 @@ module.exports = {
 ```
 
 ### Using without transpiling
-In case when it is necessary to avoid transpiling to js and run k6 right on typescript tests, you should modify import statement:
+In case when it is necessary to avoid transpiling to js and run k6 right on TypeScript tests, you should modify import statement:
 ```javascript
 import {jUnit} from "./node_modules/k6-junit/index.js";
 ```
+
+### k6 provided no data for this metric
+If you see `k6 provided no data for this metric` line in your jUnit results file and want to fix it, you have to include that metric within the k6 script configuration. Read more [here](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#summary-trend-stats).
 
 ### Configuration
 Since your project may have its own features there is a possibility to adjust behaviour 

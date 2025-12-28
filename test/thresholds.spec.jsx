@@ -94,7 +94,10 @@ const testPayload = {
                 "p(90)": 191.50142000000002
             },
             "thresholds": {
-                "p(90) < 400": {
+                "p(90) < 100": {
+                    "ok": false
+                },
+                "med < 100": {
                     "ok": false
                 }
             }
@@ -222,15 +225,18 @@ const testPayload = {
 
 test("Should include threshold into export", () => {
     const expected = `<?xml version="1.0"?>
-<testsuites tests="2" failures="2">
+<testsuites tests="3" failures="3">
   <testsuite id="0" name="Test-Case Demo" tests="1" failures="1">
     <testcase name="https://google.com is 200" classname="Test-Case Demo" >
       <failure message="80 / 20 (80.00%) checks passed">80 / 20 (80.00%) checks passed</failure>
     </testcase>
   </testsuite>
-  <testsuite id="1" name="Thresholds" tests="1" failures="1">
-    <testcase name="http_req_duration: p(90) &lt; 400" classname="Thresholds" >
-      <failure message="threshold exceeded">threshold exceeded</failure>
+  <testsuite id="1" name="Thresholds" tests="2" failures="2">
+    <testcase name="http_req_duration: p(90) &lt; 100" classname="Thresholds" >
+      <failure message="threshold exceeded">threshold exceeded, actual: 191.50142000000002</failure>
+    </testcase>
+    <testcase name="http_req_duration: med &lt; 100" classname="Thresholds" >
+      <failure message="threshold exceeded">threshold exceeded, actual: 138.2875</failure>
     </testcase>
   </testsuite>
 </testsuites>`;

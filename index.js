@@ -39,10 +39,11 @@ const sanitizeName = function (s) {
 };
 
 class TestCase {
-    constructor(className, configuration, name = null) {
+    constructor(className, configuration, name = null, actualValue = null) {
         this.configuration = configuration;
         this.className = sanitizeName(className);
         this.failMessage = "";
+        this.actualValue = actualValue;
 
         if (name) {
             this.name = sanitizeName(name);
@@ -66,10 +67,18 @@ class TestCase {
     }
 
     toXml(tab) {
+        let failMessageWithActualResults;
+        if  (this.actualValue === -1) {
+            failMessageWithActualResults = this.failMessage;
+        } else if (this.actualValue !== null) {
+            failMessageWithActualResults = `${this.failMessage}, actual: ${this.actualValue}`;
+        } else {
+            failMessageWithActualResults = `${this.failMessage}, actual: k6 provided no data for this metric`;
+        }
         return this.passed ?
             `${ident(tab)}<testcase name="${this.name}" classname="${this.className}" />` :
             `${ident(tab)}<testcase name="${this.name}" classname="${this.className}" >\n` +
-            `${ident(tab + 1)}<failure message="${this.failMessage}">${this.failMessage}</failure>\n` +
+            `${ident(tab + 1)}<failure message="${this.failMessage}">${failMessageWithActualResults}</failure>\n` +
             `${ident(tab)}</testcase>`;
     }
 }
@@ -90,7 +99,7 @@ class TestSuite {
 
         for (let index = 0; index < checks.length; ++index) {
             const check = checks[index];
-            const c = new TestCase(this.name, this.configuration);
+            const c = new TestCase(this.name, this.configuration, null, -1);
             c.fromCheck(check);
             this.cases.push(c);
 
@@ -180,12 +189,21 @@ class Report {
                 if (!Object.prototype.hasOwnProperty.call(thresholds, thresholdName)) {
                     continue;
                 }
+                let thresholdType = null;
+                let actual = null;
+                const regex = /p\(\d+\.?\d*\)|avg|med|min|max|rate|count|value/;
+                const thresholdNameWithoutSpaces = thresholdName.replaceAll(" ","");
+                if (regex.test(thresholdNameWithoutSpaces)) {
+                    thresholdType = regex.exec(thresholdNameWithoutSpaces)[0];
+                    actual = metric.values[thresholdType];
+                }
 
                 const isOk = get(thresholds[thresholdName], ["ok"]);
                 const tc = new TestCase(
                     THRESHOLDS_TEST_SUITE_NAME,
                     this.configuration,
-                    `${metricName}: ${thresholdName}`);
+                    `${metricName}: ${thresholdName}`,
+                    actual);
 
                 tc.passed = isOk;
                 thresholdCases.push(tc);
@@ -225,7 +243,7 @@ class Report {
     getChecksRecursively(group, className, nestingLevel = 0) {
         let checks = this.getChecks(group);
         if (nestingLevel > 0) {
-            // [kk]: #10 for those checks which were flattened use their's group name as a class name
+            // [kk]: #10 for those checks which were flattened use theirs group name as a class name
             checks.forEach(check => {
                 check.className = className;
             });

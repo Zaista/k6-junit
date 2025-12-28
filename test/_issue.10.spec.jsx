@@ -211,7 +211,7 @@ test("Nested payload", () => {
   </testsuite>
   <testsuite id="2" name="Thresholds" tests="1" failures="1">
     <testcase name="checks: rate == 1.00" classname="Thresholds" >
-      <failure message="threshold exceeded">threshold exceeded</failure>
+      <failure message="threshold exceeded">threshold exceeded, actual: 0.8095238095238095</failure>
     </testcase>
   </testsuite>
 </testsuites>`;
